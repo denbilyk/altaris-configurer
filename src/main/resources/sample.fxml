@@ -1,0 +1,75 @@
+<?scenebuilder-stylesheet styles.css?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<BorderPane fx:controller="net.altaris.configurer.ui.Controller"
+            xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <HBox spacing="10">
+            <padding>
+                <Insets top="15" right="12" bottom="15" left="12"/>
+            </padding>
+            <styleClass>border-top</styleClass>
+            <Label>Select serial port:
+                <padding>
+                    <Insets top="5"/>
+                </padding>
+            </Label>
+            <ComboBox fx:id="txtPort">
+
+            </ComboBox>
+
+            <Button fx:id="btnOpen" text="Open" onAction="#handleBtnOpen"/>
+        </HBox>
+
+    </top>
+
+
+    <right>
+        <VBox spacing="5" fx:id="rightVBox">
+            <padding>
+                <Insets left="10" top="10" right="10"/>
+            </padding>
+            <style>-fx-background-color: #e1e1e1</style>
+            <Button text="Status" onAction="#handleBtnStatus"/>
+        </VBox>
+    </right>
+
+    <center>
+        <GridPane hgap="2" vgap="1" alignment="TOP_CENTER">
+            <styleClass>main-grid</styleClass>
+            <HBox fx:id="wifiSettings" disable="true" spacing="10">
+                <padding>
+                    <Insets top="5" left="5" bottom="5" right="5"/>
+                </padding>
+                <GridPane.columnIndex>0</GridPane.columnIndex>
+                <GridPane.rowIndex>0</GridPane.rowIndex>
+                <Label text="SSID:">
+                    <padding>
+                        <Insets top="5"/>
+                    </padding>
+                </Label>
+                <TextField/>
+                <Label text="Password:">
+                    <padding>
+                        <Insets top="5"/>
+                    </padding>
+                </Label>
+                <TextField/>
+                <Button fx:id="btnWifiSave" text="Save" onAction="#handleBtnWifiSave"/>
+            </HBox>
+            <HBox disable="false" spacing="10" alignment="CENTER">
+                <GridPane.columnIndex>0</GridPane.columnIndex>
+                <GridPane.rowIndex>1</GridPane.rowIndex>
+                <padding>
+                    <Insets top="50"/>
+                </padding>
+                <Label fx:id="infoLabel"/>
+            </HBox>
+        </GridPane>
+    </center>
+    <stylesheets>
+        <URL value="@styles.css"/>
+    </stylesheets>
+</BorderPane>

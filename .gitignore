@@ -1,0 +1,17 @@
+**/.classpath
+**/.cproject
+.project
+.settings
+.git*
+!.gitignore
+!.gitattributes
+spec.d
+Release
+*.ipr
+*.iws
+*.iml
+.idea
+*.ids
+target/
+node/
+node_modules/
