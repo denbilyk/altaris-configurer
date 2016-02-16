@@ -5,9 +5,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import net.altaris.configurer.io.HidPort;
 
 public class Main extends Application {
     private Controller controller;
+    private HidPort hidPort;
 
     public static void main(String[] args) {
         launch(args);
@@ -25,9 +27,10 @@ public class Main extends Application {
         FXMLLoader fmxLoader = new FXMLLoader(getClass().getResource("/sample.fxml"));
         Parent root = fmxLoader.load();
         controller = fmxLoader.getController();
-        controller.init();
+        hidPort = new HidPort(controller);
+        controller.init(hidPort);
         primaryStage.setTitle("Altaris Configurer");
-        primaryStage.setScene(new Scene(root, 600, 275));
+        primaryStage.setScene(new Scene(root, 650, 350));
         primaryStage.show();
     }
 

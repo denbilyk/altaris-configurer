@@ -2,7 +2,6 @@ package net.altaris.configurer.ui;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -13,11 +12,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import jssc.SerialPortException;
-import jssc.SerialPortList;
+import net.altaris.configurer.io.HidPort;
 import net.altaris.configurer.io.SPort;
+import org.hid4java.HidDevice;
 
-import java.util.Arrays;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 
 public class Controller {
@@ -26,11 +25,13 @@ public class Controller {
     private static volatile boolean onTimer = false;
 
     @FXML
+    private Label devStatusText;
+    @FXML
     private ComboBox<String> txtPort;
     @FXML
-    private Button btnOpen;
+    private Button btnConnect;
     @FXML
-    private HBox wifiSettings;
+    private HBox settings;
     @FXML
     private VBox rightVBox;
     @FXML
@@ -40,48 +41,54 @@ public class Controller {
     @FXML
     private Parent root;
     private Timeline timeline;
+    private HidPort hidPort;
 
-    void init() {
-        Pattern pattern = Pattern.compile("tty\\.+[A-Za-z0-9]+");
-        String[] portNames = SerialPortList.getPortNames("/dev/", pattern);
-        System.out.println(Arrays.toString(portNames));
-        txtPort.setItems(FXCollections.observableList(Arrays.asList(portNames)));
+    void init(HidPort hidPort) {
+        this.hidPort = hidPort;
     }
 
-    public void handleBtnStatus(ActionEvent actionEvent) {
+    public void handleHidDeviceAttachedCallback() {
+        devStatusText.setText("Device found!");
+        btnConnect.setDisable(true);
+    }
+
+    public void handleHidDeviceDetachedCallback() {
+        devStatusText.setText("Device not found!");
+        btnConnect.setDisable(false);
+
+    }
+
+
+    public void handleBtnReadConfig(ActionEvent actionEvent) {
         System.out.println("Status button");
-        String status = sPort.getStatus();
+        String status = "";
         String text = "WIFI: test\nIP: 10.10.0.111 \nMask: 255.255.255.0";
         infoLabel.setText(status);
 
     }
 
-    public void handleBtnOpen(ActionEvent actionEvent) throws SerialPortException {
+    public void handleBtnConnect(ActionEvent actionEvent) throws SerialPortException {
         System.out.println("Button open");
-        if (btnOpen.getText().equals("Open")) {
-            System.out.println(txtPort.getValue());
-            sPort.connect(txtPort.getValue(), 9600);
-            connected = true;
-            btnOpen.setText("Close");
-            infoLabel.setText("Connected!");
-            triggerLayout();
-        } else {
-            sPort.close();
-            connected = false;
-            btnOpen.setText("Open");
-            infoLabel.setText("Disconnected");
-            triggerLayout();
+        try{
+            HidDevice device = hidPort.getDevice();
+            device.open();
+            Map<String, String> devConfig = hidPort.readConfig();
+
+
+        } catch (NullPointerException e) {
+            setUIDeviceNotFound();
         }
+
     }
 
     public void handleBtnWifiSave(ActionEvent actionEvent) throws InterruptedException {
         infoLabel.setText("Saved! Rebooting...");
         rightVBox.setDisable(true);
-        wifiSettings.setDisable(true);
+        settings.setDisable(true);
         timeline = new Timeline(new KeyFrame(Duration.millis(3000), ev -> {
             rightVBox.setDisable(false);
-            wifiSettings.setDisable(false);
-            handleBtnStatus(null);
+            settings.setDisable(false);
+            handleBtnReadConfig(null);
         }));
         timeline.setCycleCount(1);
         timeline.play();
@@ -97,13 +104,31 @@ public class Controller {
     private void triggerLayout() {
         if (connected) {
             rightVBox.setDisable(false);
-            wifiSettings.setDisable(false);
+            settings.setDisable(false);
             txtPort.setDisable(true);
         } else {
             rightVBox.setDisable(true);
-            wifiSettings.setDisable(true);
+            settings.setDisable(true);
             txtPort.setDisable(false);
         }
     }
 
+    public void handleBtnRefresh(ActionEvent actionEvent) {
+        if (hidPort.isDeviceDetected()) {
+            setUIDeviceDetected();
+        } else {
+            setUIDeviceNotFound();
+        }
+
+    }
+
+    private void setUIDeviceNotFound() {
+        btnConnect.setDisable(true);
+        devStatusText.setText("Device not found!");
+    }
+
+    private void setUIDeviceDetected() {
+        btnConnect.setDisable(false);
+        devStatusText.setText("Device found!");
+    }
 }
